@@ -35,6 +35,7 @@
         "properties": {
           "email": {
             "type": "string",
+            "format": "email",
             "description": "The email address"
           },
           "code": {
