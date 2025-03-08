@@ -918,10 +918,13 @@
             "uuid": {
               "type": "string",
               "format": "uuid",
+              "nullable": false,
               "description": "Unique identifier for the surah."
             },
             "number": {
               "type": "integer",
+              "format": "int32",
+              "nullable": false,
               "description": "Surah number."
             },
             "period": {
@@ -949,20 +952,40 @@
                   },
                   "translation_phrase": {
                     "type": "string",
+                    "nullable": true,
                     "description": "A phrase that translates the meaning of the surah."
                   },
                   "translation": {
                     "type": "string",
+                    "nullable": true,
                     "description": "Translation of the surah name."
                   },
                   "transliteration": {
                     "type": "string",
+                    "nullable": true,
                     "description": "Transliteration of the surah name."
                   }
-                }
+                },
+                "required": ["arabic"]
+              }
+            },
+            "search_terms": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string",
+                "description": "Search terms associated with the surah."
               }
             }
-          }
+          },
+          "required": [
+            "uuid",
+            "number",
+            "period",
+            "number_of_ayahs",
+            "names",
+            "search_terms"
+          ]
         }
       },
       "SurahAddRequestData": {
@@ -971,47 +994,42 @@
           "name": {
             "type": "string",
             "description": "The surah name.",
-            "example": "الفاتحة"
+            "example": "الفاتحة",
+            "nullable": false
           },
           "period": {
             "type": "string",
             "description": "Indicates whether the surah is Makki or Madani.",
-            "example": "makki"
+            "example": "makki",
+            "nullable": false
           },
           "number": {
             "type": "number",
             "description": "The number of the surah in the Mushaf.",
-            "example": 1
+            "nullable": false
           },
           "mushaf_uuid": {
             "type": "string",
             "description": "The UUID of the Mushaf in which the surah belongs.",
-            "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
-          },
-          "bismillah_status": {
-            "type": "boolean",
-            "description": "Determines whether Bismillah exists in the surah.",
-            "example": true
-          },
-          "bismillah_as_first_ayah": {
-            "type": "boolean",
-            "description": "Determines if Bismillah is the first ayah of the surah.",
-            "example": false
+            "nullable": false
           },
           "name_translation_phrase": {
             "type": "string",
             "description": "The translation phrase for the surah name in the desired language.",
-            "example": "Al-Fatiha"
+            "example": "Al-Fatiha",
+            "nullable": true
           },
           "name_pronunciation": {
             "type": "string",
             "description": "The pronunciation of the surah name in Arabic.",
-            "example": "Al-Fatiha"
+            "example": "Al-Fatiha",
+            "nullable": true
           },
           "name_transliteration": {
             "type": "string",
             "description": "The transliteration of the surah name from Arabic to Latin.",
-            "example": "Al-Fatiha"
+            "example": "Al-Fatiha",
+            "nullable": true
           }
         },
         "required": ["name", "period", "number", "mushaf_uuid"]
@@ -1019,19 +1037,12 @@
       "SurahViewResponseData": {
         "type": "object",
         "properties": {
-          "uuid": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": false,
-            "description": "UUID of the surah"
-          },
           "mushaf": {
             "type": "object",
             "properties": {
               "uuid": {
                 "type": "string",
                 "format": "uuid",
-                "nullable": false,
                 "description": "UUID of the mushaf",
                 "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
               },
@@ -1050,7 +1061,8 @@
                 "description": "Source of the mushaf",
                 "example": "tanzil"
               }
-            }
+            },
+            "required": ["uuid"]
           },
           "names": {
             "type": "array",
@@ -1082,92 +1094,128 @@
                   "description": "Transliteration of the surah name",
                   "example": "Al-Fātiḥa"
                 }
-              }
+              },
+              "required": ["arabic"]
             }
           },
           "period": {
             "type": "string",
             "enum": ["makki", "madani"],
             "description": "Period of the surah (e.g., Makki or Madani)",
-            "example": "Makki"
+            "example": "makki"
           },
           "number": {
             "type": "integer",
-            "format": "int64",
-            "example": 1,
-            "description": "Surah number"
+            "description": "Surah number",
+            "example": 1
           },
-          "bismillah_status": {
-            "type": "boolean",
-            "description": "Indicates if the surah contains 'Bismillah'",
-            "example": true
-          },
-          "bismillah_as_first_ayah": {
-            "type": "boolean",
-            "description": "Indicates if 'Bismillah' is the first ayah of the surah",
-            "example": true
-          },
-          "bismillah_text": {
-            "type": "string",
-            "description": "Text of 'Bismillah' if it is the first ayah",
-            "example": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+          "bismillah": {
+            "type": "object",
+            "description": "Bismillah information (if present)",
+            "properties": {
+              "is_first_ayah": {
+                "type": "boolean",
+                "description": "Indicates if 'Bismillah' is the first ayah of the surah",
+                "example": true
+              },
+              "text": {
+                "type": "string",
+                "description": "Text of 'Bismillah'",
+                "example": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+              }
+            },
+            "required": ["is_first_ayah", "text"]
           },
           "number_of_ayahs": {
             "type": "integer",
             "description": "Number of ayahs in the surah",
             "example": 7
           },
-          "ayahs": {
+          "search_terms": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "number": {
-                  "type": "integer",
-                  "format": "int64",
-                  "nullable": false,
-                  "example": 1,
-                  "description": "Ayah number in the surah"
+              "type": "string"
+            },
+            "description": "Search terms for the surah"
+          },
+          "ayahs": {
+            "type": "array",
+            "description": "List of ayahs in the surah",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer",
+                      "description": "Ayah number in the surah",
+                      "example": 1
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID of the ayah"
+                    },
+                    "sajdah": {
+                      "type": "string",
+                      "enum": ["vajib", "mostahab"],
+                      "nullable": true,
+                      "description": "Indicates if the ayah has sajdah"
+                    },
+                    "text": {
+                      "type": "string",
+                      "description": "Text of the ayah",
+                      "example": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+                    }
+                  },
+                  "required": ["number", "uuid", "text"]
                 },
-                "uuid": {
-                  "type": "string",
-                  "format": "uuid",
-                  "nullable": false,
-                  "description": "UUID of the ayah"
-                },
-                "sajdah": {
-                  "type": "string",
-                  "enum": ["vajib", "mostahab"],
-                  "nullable": true,
-                  "description": "Indicates if the ayah has sajdah"
-                },
-                "text": {
-                  "type": "string",
-                  "nullable": false,
-                  "description": "Text of the ayah (if format is 'text')",
-                  "example": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
-                },
-                "words": {
-                  "type": "string",
-                  "nullable": false,
-                  "example": ["بِسْمِ", "اللَّهِ", "الرَّحْمَنِ", "الرَّحِيمِ"],
-                  "description": "Words of the ayah"
+                {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer",
+                      "description": "Ayah number in the surah",
+                      "example": 1
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID of the ayah"
+                    },
+                    "sajdah": {
+                      "type": "string",
+                      "enum": ["vajib", "mostahab"],
+                      "nullable": true,
+                      "description": "Indicates if the ayah has sajdah"
+                    },
+                    "words": {
+                      "type": "array",
+                      "description": "Words of the ayah",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "بِسْمِ",
+                        "اللَّهِ",
+                        "الرَّحْمَنِ",
+                        "الرَّحِيمِ"
+                      ]
+                    }
+                  },
+                  "required": ["number", "uuid", "words"]
                 }
-              },
-              "required": ["number", "uuid", "sajdah", "text", "words"]
+              ]
             }
           }
         },
         "required": [
-          "uuid",
           "mushaf",
           "names",
           "period",
           "number",
-          "bismillah_status",
-          "bismillah_as_first_ayah",
-          "bismillah_text",
           "number_of_ayahs",
+          "search_terms",
           "ayahs"
         ]
       },
@@ -1206,36 +1254,27 @@
           },
           "number": {
             "type": "integer",
-            "format": "int64",
+            "format": "int32",
             "nullable": false,
             "description": "The surah number."
-          },
-          "bismillah_status": {
-            "type": "boolean",
-            "nullable": false,
-            "description": "Determines if Bismillah is present in the surah.",
-            "example": true
-          },
-          "bismillah_as_first_ayah": {
-            "type": "boolean",
-            "nullable": false,
-            "description": "Indicates if Bismillah is treated as the first ayah.",
-            "example": false
           },
           "mushaf_uuid": {
             "type": "string",
             "format": "uuid",
             "nullable": false,
             "description": "The UUID of the Mushaf associated with the surah."
+          },
+          "search_terms": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "Search terms related to the surah."
+            },
+            "description": "Optional list of search terms associated with the surah."
           }
         },
-        "required": [
-          "name",
-          "number",
-          "bismillah_status",
-          "bismillah_as_first_ayah",
-          "mushaf_uuid"
-        ]
+        "required": ["name", "number", "mushaf_uuid"]
       },
       "AyahListResponseData": {
         "type": "object",
@@ -1497,19 +1536,6 @@
       "WordViewResponseData": {
         "type": "object",
         "properties": {
-          "uuid": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": false,
-            "description": "Unique identifier for the word"
-          },
-          "creator_user_id": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": false,
-            "example": "1",
-            "description": "ID of the user who created the word"
-          },
           "word": {
             "type": "string",
             "nullable": false,
@@ -1567,25 +1593,16 @@
               "description": "Indicates whether the translation content is approved",
               "example": true
             },
-            "bismillah": {
-              "type": "string",
-              "nullable": true,
-              "description": "Translated Bismillah text",
-              "example": "In the name of Allah, the Most Gracious, the Most Merciful."
-            },
             "translator": {
               "type": "object",
               "properties": {
                 "account_uuid": {
                   "type": "string",
                   "format": "uuid",
-                  "nullable": false,
-                  "description": "Unique identifier of the translator's account",
-                  "example": "f1d1e3b5-55a9-4f9b-96a1-8d3e8b7d9a27"
+                  "description": "Unique identifier of the translator's account"
                 },
                 "username": {
                   "type": "string",
-                  "nullable": false,
                   "description": "Username of the translator",
                   "example": "translator123"
                 },
@@ -1602,12 +1619,7 @@
                   "example": "Doe"
                 }
               },
-              "required": [
-                "account_uuid",
-                "username",
-                "first_name",
-                "last_name"
-              ]
+              "required": ["account_uuid", "username"]
             }
           },
           "required": [
@@ -1616,7 +1628,6 @@
             "release_date",
             "source",
             "approved",
-            "bismillah",
             "translator"
           ]
         }
@@ -1664,7 +1675,6 @@
           "mushaf_uuid": {
             "type": "string",
             "format": "uuid",
-            "nullable": false,
             "description": "Unique identifier of the mushaf"
           },
           "language": {
@@ -1691,24 +1701,17 @@
             "nullable": false,
             "description": "Translation status"
           },
-          "bismillah": {
-            "type": "string",
-            "nullable": false,
-            "description": "Translated Bismillah text",
-            "example": "In the name of Allah, the Most Gracious, the Most Merciful."
-          },
           "translator": {
             "type": "object",
             "properties": {
               "account_uuid": {
                 "type": "string",
                 "format": "uuid",
-                "nullable": false,
-                "description": "Unique identifier of the translator's account"
+                "description": "Unique identifier of the translator's account",
+                "example": "f1d1e3b5-55a9-4f9b-96a1-8d3e8b7d9a27"
               },
               "username": {
                 "type": "string",
-                "nullable": false,
                 "description": "Username of the translator",
                 "example": "translator123"
               },
@@ -1736,7 +1739,6 @@
                 "uuid": {
                   "type": "string",
                   "format": "uuid",
-                  "nullable": false,
                   "description": "Unique identifier of the ayah"
                 },
                 "text_uuid": {
@@ -1747,12 +1749,10 @@
                 },
                 "number": {
                   "type": "integer",
-                  "nullable": false,
                   "description": "Ayah number within the surah"
                 },
                 "surah_number": {
                   "type": "integer",
-                  "nullable": false,
                   "description": "Surah number"
                 },
                 "text": {
@@ -1760,6 +1760,12 @@
                   "nullable": true,
                   "description": "Translated text of the ayah",
                   "example": "Praise be to Allah, the Lord of all worlds."
+                },
+                "bismillah": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Translated Bismillah text",
+                  "example": "In the name of Allah, the Most Gracious, the Most Merciful."
                 }
               },
               "required": ["uuid", "number", "surah_number"]
@@ -1771,7 +1777,6 @@
           "language",
           "source",
           "status",
-          "bismillah",
           "translator",
           "ayahs"
         ]
@@ -1802,47 +1807,35 @@
             "nullable": true,
             "description": "Updated source of the translation",
             "example": "Tanzil"
-          },
-          "bismillah": {
-            "type": "string",
-            "nullable": false,
-            "description": "Updated translated Bismillah text",
-            "example": "In the name of Allah, the Most Gracious, the Most Merciful."
           }
         },
-        "required": ["language", "bismillah"]
+        "required": ["language"]
       },
-      "TranslationTextViewResponseData": {
+      "TranslationAyahViewResponseData": {
         "type": "object",
         "properties": {
           "uuid": {
             "type": "string",
             "format": "uuid",
-            "nullable": false,
-            "description": "Unique identifier for the translation text"
-          },
-          "translation_uuid": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": false,
-            "description": "UUID of the translation to which this text belongs"
-          },
-          "ayah_uuid": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": false,
-            "description": "UUID of the ayah this translation corresponds to"
+            "description": "Unique identifier for the translation ayah"
           },
           "text": {
             "type": "string",
+            "description": "Translation text for the ayah"
+          },
+          "bismillah": {
+            "type": "string",
             "nullable": true,
-            "description": "Translated text of the ayah",
-            "example": "Praise be to Allah, the Lord of all worlds."
+            "description": "Bismillah text for the translation ayah, if available"
+          },
+          "has_bismillah": {
+            "type": "boolean",
+            "description": "Indicates whether the ayah originally had bismillah text"
           }
         },
-        "required": ["uuid", "translation_uuid", "ayah_uuid", "text"]
+        "required": ["uuid", "text", "bismillah", " has_bismillah"]
       },
-      "TranslationTextEditRequestData": {
+      "TranslationAyahEditRequestData": {
         "type": "object",
         "properties": {
           "text": {
@@ -1851,26 +1844,14 @@
             "example": "Praise be to Allah, the Lord of all worlds.",
             "description": "Updated or newly added translation text"
           },
-          "translation_uuid": {
+          "bismillah": {
             "type": "string",
-            "format": "uuid",
-            "nullable": false,
-            "description": "Unique identifier of the translation"
-          },
-          "ayah_uuid": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": false,
-            "description": "Unique identifier of the ayah being translated"
-          },
-          "creator_user_id": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": false,
-            "description": "ID of the user modifying or adding the translation text"
+            "nullable": true,
+            "example": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+            "description": "Bismillah text for the translation if applicable"
           }
         },
-        "required": ["text", "translation_uuid", "ayah_uuid", "creator_user_id"]
+        "required": ["text"]
       },
       "PhraseListResponseData": {
         "type": "array",
@@ -4069,7 +4050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TranslationTextViewResponseData"
+                  "$ref": "#/components/schemas/TranslationAyahViewResponseData"
                 }
               }
             }
@@ -4098,7 +4079,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TranslationTextEditRequestData"
+                "$ref": "#/components/schemas/TranslationAyahEditRequestData"
               }
             }
           }
